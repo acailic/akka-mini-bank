@@ -74,13 +74,12 @@ object Bank {
     //event handler
   }
 
-
 }
 
 object BankPlayground {
-  import  scala.concurrent.duration._
   import PersistentBankAccount.Command._
   import PersistentBankAccount.Response._
+  import PersistentBankAccount.Response
 
   def main(args: Array[String]): Unit = {
     val rootBehavior: Behavior[NotUsed] = Behaviors.setup { context =>
