@@ -84,6 +84,16 @@ object BankPlayground {
   def main(args: Array[String]): Unit = {
     val rootBehavior: Behavior[NotUsed] = Behaviors.setup { context =>
       val bank = context.spawn(Bank(), "bank")
+
+      val responseHandler = context.spawn(Behaviors.receiveMessage[Response] {
+        case BankAccountCreatedResponse(id) =>
+          println(s"BankAccountCreatedResponse: $id")
+          Behaviors.same
+        case GetBankAccountResponse(account) =>
+          println(s"Bank account: $account")
+          Behaviors.same
+      }, "responseHandler")
+
       // ask pattern
       import akka.actor.typed.scaladsl.AskPattern._
       import scala.concurrent.duration._
@@ -92,14 +102,17 @@ object BankPlayground {
       implicit val scheduler: Scheduler = context.system.scheduler
       implicit val ec: ExecutionContext = context.executionContext
 
-      bank.ask(replyTo => CreateBankAccount( "John", "EUR", 100, replyTo)).flatMap{
-        case BankAccountCreatedResponse(id) =>
-          context.log.info(s"Bank account created: $id")
-          bank.ask(replyTo => GetBankAccount(id, replyTo))
-      }.foreach{
-        case GetBankAccountResponse(maybeBankAccount) =>
-          context.log.info(s"Bank account: $maybeBankAccount")
-      }
+      // instead of using the ask pattern, we can use tell pattern
+      //bank ! CreateBankAccount( "John", "Doe", 1000, responseHandler)
+      bank ! GetBankAccount("df112c3d-8539-4e32-814f-5a1951bb6dcb", responseHandler)
+//      bank.ask(replyTo => CreateBankAccount( "John", "EUR", 100, replyTo)).flatMap{
+//        case BankAccountCreatedResponse(id) =>
+//          context.log.info(s"Bank account created: $id")
+//          bank.ask(replyTo => GetBankAccount(id, replyTo))
+//      }.foreach{
+//        case GetBankAccountResponse(maybeBankAccount) =>
+//          context.log.info(s"Bank account: $maybeBankAccount")
+//      }
       Behaviors.empty
     }
 
