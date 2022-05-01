@@ -7,6 +7,7 @@ Aktor typed ref
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import com.acailic.bank.actors.PersistentBankAccount.Response._
 
 import scala.util.{Failure, Success, Try}
 
@@ -46,13 +47,11 @@ object PersistentBankAccount {
 
   //responses
   sealed trait Response
-
-  case class BankAccountCreatedResponse(id: String) extends Response
-
-  case class BankAccountBalanceUpdated(maybeBankAccount: Option[BankAccount]) extends Response
-
-  case class GetBankAccountResponse(maybeBankAccount: Option[BankAccount]) extends Response
-
+  object Response {
+    case class BankAccountCreatedResponse(id: String) extends Response
+    case class BankAccountBalanceUpdated(maybeBankAccount: Option[BankAccount]) extends Response
+    case class GetBankAccountResponse(maybeBankAccount: Option[BankAccount]) extends Response
+  }
   /*
   Commands = messages
   events = to persist in Casandra
