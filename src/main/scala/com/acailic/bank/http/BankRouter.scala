@@ -35,7 +35,8 @@ class BankRouter(bank: ActorRef[Command])(implicit system: ActorSystem[_]) {
   def getBankAccount(id: String): Future[Response] = {
     bank.ask(replyTo => GetBankAccount(id, replyTo))
   }
-  def updateBankAccount(id: String,request: BankAccountUpdateRequest): Future[Response] = {
+
+  def updateBankAccount(id: String, request: BankAccountUpdateRequest): Future[Response] = {
     bank.ask(replyTo => request.toCommand(id, replyTo))
   }
 
@@ -52,9 +53,9 @@ class BankRouter(bank: ActorRef[Command])(implicit system: ActorSystem[_]) {
    * 200 OK json  repr bank account
    */
   /** *
-   *  PUT /bank/uuid
-   *  200 OK json  currency and balance
-   *  400 Bad Request
+   * PUT /bank/uuid
+   * 200 OK json  currency and balance
+   * 400 Bad Request
    *    - currency not supported
    */
   //* All routes defined here
@@ -89,12 +90,13 @@ class BankRouter(bank: ActorRef[Command])(implicit system: ActorSystem[_]) {
         } ~ put {
 
           entity(as[BankAccountUpdateRequest]) { request =>
-          onSuccess(updateBankAccount(id, request)) {
-            case BankAccountBalanceUpdated(Some(account)) => complete(account)
-            case BankAccountBalanceUpdated(None) => complete(StatusCodes.NotFound, FailureResponse(s"Bank account $id not found"))
+            onSuccess(updateBankAccount(id, request)) {
+              case BankAccountBalanceUpdated(Some(account)) => complete(account)
+              case BankAccountBalanceUpdated(None) => complete(StatusCodes.NotFound, FailureResponse(s"Bank account $id not found"))
+            }
           }
-        }
         }
       }
 
   }
+}
